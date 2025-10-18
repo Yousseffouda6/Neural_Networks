@@ -1,38 +1,65 @@
+import pygame
+import sys
+import time
+from flower import Flower
 from population import Population
-import random
+
+pygame.init()
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Flower Evolution")
+clock = pygame.time.Clock()
+
+font = pygame.font.SysFont(None, 30)
+button_rect = pygame.Rect(300, 500, 200, 50)
+button_color = (0, 180, 0)
+
+population = Population(size=8)
+flower_positions = []
+spacing = WIDTH // (len(population.flowers) + 1)
+
+def draw_flowers():
+    flower_positions.clear()
+    for i, f in enumerate(population.flowers):
+        x = spacing * (i + 1)
+        y = HEIGHT // 2
+        pygame.draw.circle(screen, f.genes["center_color"], (x, y), f.genes["center_size"])
+        flower_positions.append((x, y, f))
+
+def draw_button():
+    pygame.draw.rect(screen, button_color, button_rect)
+    text = font.render("Evolve New Generation", True, (255, 255, 255))
+    screen.blit(text, (button_rect.x + 10, button_rect.y + 15))
 
 def main():
-    # 1. Create initial population
-    pop = Population(size=8)
+    running = True
+    last_hover = {f: 0 for f in population.flowers}
 
-    # 2. Assign fake fitness values (simulate user hovering)
-    print("\n--- Assigning random fitness values ---")
-    for f in pop.flowers:
-        f.fitness = random.uniform(0, 10)  # 0–10 hover time for testing
+    while running:
+        screen.fill((30, 30, 30))
+        draw_flowers()
+        draw_button()
+        mouse_pos = pygame.mouse.get_pos()
 
-    # 3. Show initial details
-    pop.sort_by_fitness()
-    pop.populationDetails()
+        # update fitness based on hover time
+        for (x, y, f) in flower_positions:
+            dist = ((mouse_pos[0]-x)**2 + (mouse_pos[1]-y)**2)**0.5
+            if dist <= f.genes["center_size"]:
+                f.fitness += 0.1  # increase fitness while hovered
 
-    # 4. Generate next generation
-    print("\n--- Generating next generation ---")
-    pop.generate_next_generation = lambda: None  # skip pygame for now
-    parents = pop.selection_roulette(num_parents=4)
-    print("Selected parents (fitness):", [p for p in parents])
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if button_rect.collidepoint(event.pos):
+                    print("\n--- Evolving New Generation ---")
+                    population.evolve_population()
 
-    # 5. Test crossover & mutation manually
-    print("\n--- Testing crossover and mutation ---")
-    p1, p2 = parents[0], parents[1]
-    print("Parent1 DNA:", p1.dna)
-    print("Parent2 DNA:", p2.dna)
+        pygame.display.flip()
+        clock.tick(60)
 
-    child = pop.crossover(p1, p2, crossover_rate=0.65)
-    print("Child DNA (after crossover):", child.dna)
-
-    pop.mutation(child, mutation_rate=0.05)
-    print("Child DNA (after mutation):", child.dna)
-    print("Child genes:", child.genes)
-
+    pygame.quit()
+    sys.exit()
 
 if __name__ == "__main__":
     main()

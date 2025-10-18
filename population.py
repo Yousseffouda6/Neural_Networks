@@ -2,7 +2,7 @@ from flower import Flower, GENES_RANGES
 import random
 
 class Population:
-    def __init__(self, size):
+    def __init__(self, size=8):
         self.size = size
         self.flowers = [Flower() for _ in range(size)]
         print(f"--- Population Created ---")
@@ -41,18 +41,40 @@ class Population:
         return selected_parents
 
 
-    def crossover(self, parent1, parent2, crossover_rate):
+    def crossover(self, parent1, parent2, crossover_rate=0.65):
         """Combine DNA of two parents"""
         #Perform crossover if the random number falls within 65% of the range (0 → 0.65).
-        if random.random() > crossover_rate:
+        random_value = random.random()
+        if random_value > crossover_rate:
+            print("No crossover occurred (random value:", random_value,")")
             return Flower(dna=parent1.dna.copy())
 
         point = random.randint(1, len(parent1.dna) - 1)
         child_dna = parent1.dna[:point] + parent2.dna[point:]
         return Flower(dna=child_dna)
 
-    def mutation(self, flower, mutation_rate=0.1):
+    def mutation(self, flower, mutation_rate=0.05):
         for i, (low, high) in enumerate(GENES_RANGES):
-            if random.random() < mutation_rate:
+            random_value = random.random()
+            if random_value < mutation_rate:
+                print("Mutating gene", i, "(random value:", random_value, ")")
                 flower.dna[i] = random.randint(low, high)
         flower.genes = flower.getGenes()
+
+    def evolve_population(self):
+        #self.sort_by_fitness()
+        parents = self.selection_roulette()
+        print("--- Selected Parents ---")
+        for p in parents:
+            print(p)
+
+        new_flowers = []
+        while len(new_flowers) < self.size:
+            p1, p2 = random.sample(parents, 2)
+            child = self.crossover(p1, p2)
+            self.mutation(child)
+            new_flowers.append(child)
+
+        self.flowers = new_flowers
+        print("--- New Generation Created ---")
+

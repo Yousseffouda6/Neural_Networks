@@ -1,5 +1,6 @@
 import math, random, sys, time
-import pygame
+
+from numpy import size
 
 GENES_RANGES = [(10, 50), (0, 255), (0, 255), (0, 255), (0, 255), (0, 255), (0, 255), (0, 255), (0, 255), (0, 255),
                 (0, 7)]
@@ -34,3 +35,6 @@ class Flower:
     def __repr__(self):
         """Used when printing lists of Flowers (debugging)"""
         return self.__str__()
+    
+    def initialize_population(size=8):
+        return [Flower() for _ in range(size)]
