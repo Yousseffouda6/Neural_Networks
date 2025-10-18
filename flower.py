@@ -33,8 +33,16 @@ class Flower:
         """Human-readable string representation (like Java's toString)"""
         return f"Flower(fitness={self.fitness:.2f}, genes={self.genes})"
     def __repr__(self):
-        """Used when printing lists of Flowers (debugging)"""
-        return self.__str__()
+        return (
+            f"Flower("
+            f"fitness={self.fitness:.2f}, "
+            f"center_size={self.genes['center_size']}, "
+            f"center_color={self.genes['center_color']}, "
+            f"petal_color={self.genes['petal_color']}, "
+            f"stem_color={self.genes['stem_color']}, "
+            f"num_petals={self.genes['num_petals']}) "
+        )
+
     
     def initialize_population(size=8):
         return [Flower() for _ in range(size)]

@@ -51,6 +51,7 @@ class Population:
 
         point = random.randint(1, len(parent1.dna) - 1)
         child_dna = parent1.dna[:point] + parent2.dna[point:]
+        print("Crossover occurred at point", point, "(random value:", random_value,")")
         return Flower(dna=child_dna)
 
     def mutation(self, flower, mutation_rate=0.05):
@@ -76,5 +77,8 @@ class Population:
             new_flowers.append(child)
 
         self.flowers = new_flowers
+        for i, flower in enumerate(self.flowers):
+            print(f"Flower {i + 1}: {flower.genes} (fitness={flower.fitness:.2f})")
         print("--- New Generation Created ---")
+
 
