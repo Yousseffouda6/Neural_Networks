@@ -55,7 +55,7 @@ def draw_flowers():
     )
 
     # Add padding between flowers
-    spacing = max_flower_width + 65
+    spacing = max_flower_width + 62
     total_width = spacing * len(population.flowers)
     start_x = (WIDTH - total_width) // 2 + spacing // 2
 
@@ -66,21 +66,25 @@ def draw_flowers():
         flower_positions.append((x, y, f))
 
 
+# Centered button dimensions
+button_width, button_height = 300, 60
+button_rect = pygame.Rect(0, 0, button_width, button_height)
+button_rect.center = (WIDTH // 2, HEIGHT - 80)  # horizontally centered, near bottom
+
+
 def draw_button():
-    button_color = (0, 150, 0)  # softer green
+    base_color = (0, 150, 0)
     hover_color = (0, 200, 0)
     mouse_pos = pygame.mouse.get_pos()
 
-    # highlight on hover
-    if button_rect.collidepoint(mouse_pos):
-        color = hover_color
-    else:
-        color = button_color
+    # Highlight on hover
+    color = hover_color if button_rect.collidepoint(mouse_pos) else base_color
 
-    pygame.draw.rect(screen, color, button_rect, border_radius=8)
+    # Draw centered button
+    pygame.draw.rect(screen, color, button_rect, border_radius=12)
+
+    # Render text and ensure it's centered fully inside the box
     text = font.render("Evolve New Generation", True, (255, 255, 255))
-    
-    # center the text inside button
     text_rect = text.get_rect(center=button_rect.center)
     screen.blit(text, text_rect)
 
@@ -88,11 +92,17 @@ def draw_button():
 
 def main():
     running = True
+    generation = 0  # start from generation 0
 
     while running:
         screen.fill((30, 30, 30))
         draw_flowers()
         draw_button()
+
+        # Draw generation text in bottom-left
+        generation_text = font.render(f"Generation: {generation}", True, (255, 255, 255))
+        screen.blit(generation_text, (20, HEIGHT - 40))  # 20 px from left, near bottom
+
         mouse_pos = pygame.mouse.get_pos()
 
         # Update fitness based on hover time
@@ -109,12 +119,14 @@ def main():
                 if button_rect.collidepoint(event.pos):
                     print("\n--- Evolving New Generation ---")
                     population.evolve_population()
+                    generation += 1  # increment generation number
 
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
     sys.exit()
+
 
 if __name__ == "__main__":
     main()
