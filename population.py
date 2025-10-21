@@ -41,7 +41,7 @@ class Population:
 
     def crossover(self, parent1, parent2, crossover_rate=0.65):
         """Combine DNA of two parents to produce two children with detailed debugging."""
-        print("\n--- Crossover Debug Info ---")
+        print("\n--- Crossover Info ---")
         print(f"Parent 1 DNA: {parent1.dna}")
         print(f"Parent 2 DNA: {parent2.dna}")
 
@@ -78,7 +78,7 @@ class Population:
 
     def mutation(self, flower, mutation_rate=0.05):
         """Mutate flower DNA with detailed debugging output."""
-        print("\n--- Mutation Debug Info ---")
+        print("\n--- Mutation Info ---")
         print(f"Original DNA: {flower.dna}")
         print(f"Mutation rate: {mutation_rate}")
 
@@ -102,6 +102,7 @@ class Population:
     def evolve_population(self):
         parents = self.selection()
         new_flowers = []
+        i = 0
         while len(new_flowers) < self.size:
             p1, p2 = parents[0], parents[1]
             p3, p4 = parents[2], parents[3]
@@ -115,11 +116,16 @@ class Population:
             new_flowers.append(child2)
             new_flowers.append(child3)
             new_flowers.append(child4)
-            print(f"--- Generated 4 New Children ---")
+            if (i == 0): print(f"--- Generated the first 4 children ---".center(160))
+            else: print(f"--- Generated the second 4 children ---".center(160))
+            print()
+            print()
+            i += 1
+
 
         self.flowers = new_flowers
+        print("--- Updated Population ---")
         for i, flower in enumerate(self.flowers):
             print(f"Flower {i + 1}: {flower.genes} (fitness={flower.fitness:.2f})")
-        print("--- New Generation Created ---")
 
 

@@ -19,32 +19,38 @@ flower_positions = []
 spacing = WIDTH // (len(population.flowers) + 1)
 
 def draw_flower(x, y, f):
-    """Draw full flower: stem, petals, and center."""
+    """Draw full flower: stem, translucent petals, and center."""
     g = f.genes
 
-    # Draw stem
-    stem_height = 100
-    pygame.draw.rect(
-        screen,
-        g["stem_color"],
-        (x - 5, y, 10, stem_height)
-    )
+    # --- Stem ---
+    stem_width = 6
+    stem_height = 150
+    pygame.draw.rect(screen, g["stem_color"], (x - stem_width // 2, y, stem_width, stem_height))
 
-    # Draw petals
+    # --- Petals (with transparency) ---
     petal_count = g["num_petals"]
     petal_color = g["petal_color"]
     petal_radius = g["center_size"] // 2
-    petal_distance = g["center_size"] * 1.5
+    petal_distance = g["center_size"] * 1.2
 
     if petal_count > 0:
+        # Create a transparent surface for petals
+        petal_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+
+        # Add an alpha channel (transparency)
+        translucent_color = (*petal_color, 100)  # last value = alpha (0–255)
         for i in range(petal_count):
             angle = (2 * math.pi / petal_count) * i
             px = x + math.cos(angle) * petal_distance
             py = y + math.sin(angle) * petal_distance
-            pygame.draw.circle(screen, petal_color, (int(px), int(py)), petal_radius)
+            pygame.draw.circle(petal_surface, translucent_color, (int(px), int(py)), petal_radius)
 
-    # Draw center
+        # Draw the petal layer onto the screen
+        screen.blit(petal_surface, (0, 0))
+
+    # --- Center ---
     pygame.draw.circle(screen, g["center_color"], (x, y), g["center_size"])
+
 
 def draw_flowers():
     flower_positions.clear()
@@ -94,14 +100,20 @@ def main():
     running = True
     generation = 0  # start from generation 0
 
+    # --- Print initial population before anything happens ---
+    print("\n--- Current Population (Generation 0) ---")
+    for i, f in enumerate(population.flowers, start=1):
+        print(f"Flower {i}: {f.genes} (fitness={f.fitness:.2f})")
+    print("-----------------------------------------\n")
+
     while running:
-        screen.fill((30, 30, 30))
+        screen.fill((240, 240, 240))
         draw_flowers()
         draw_button()
 
         # Draw generation text in bottom-left
-        generation_text = font.render(f"Generation: {generation}", True, (255, 255, 255))
-        screen.blit(generation_text, (20, HEIGHT - 40))  # 20 px from left, near bottom
+        generation_text = font.render(f"Generation: {generation}", True, (0, 0, 0))
+        screen.blit(generation_text, (20, HEIGHT - 40))
 
         mouse_pos = pygame.mouse.get_pos()
 
@@ -110,22 +122,28 @@ def main():
             dist = ((mouse_pos[0] - x)**2 + (mouse_pos[1] - y)**2)**0.5
             if dist <= f.genes["center_size"]:
                 f.fitness += 0.1
-                print(f"Flower hovered: {f}, fitness increased to {f.fitness:.2f}")
+                #print(f"Flower hovered: {f}, fitness increased to {f.fitness:.2f}")
 
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if button_rect.collidepoint(event.pos):
-                    print("\n--- Evolving New Generation ---")
+                    print(f"\n--- Evolving to Generation {generation + 1} ---")
                     population.evolve_population()
-                    generation += 1  # increment generation number
+                    generation += 1
+                    print(f"\n--- Current Population (Generation {generation}) ---")
+                    for i, f in enumerate(population.flowers, start=1):
+                        print(f"Flower {i}: {f.genes} (fitness={f.fitness:.2f})")
+                    print("-----------------------------------------\n")
 
         pygame.display.flip()
         clock.tick(60)
 
     pygame.quit()
     sys.exit()
+
 
 
 if __name__ == "__main__":
